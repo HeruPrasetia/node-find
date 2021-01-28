@@ -1,0 +1,11 @@
+<p></p>
+<ul class="list-group">
+    <li class="list-group-item" style="cursor: pointer;" onclick="load('./data?p=<%= posisi; %>&mode=back', 'tampil')">Kembali
+        <%= posisi; %>
+    </li>
+    <% files.forEach(file=> { %>
+        <li class="list-group-item" style="cursor: pointer;" onclick="load('./data?p=<%= file; %>', 'tampil')">
+            <%= file; %>
+        </li>
+        <% }); %>
+</ul>
