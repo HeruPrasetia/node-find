@@ -1,11 +1,458 @@
-<p></p>
-<ul class="list-group">
-    <li class="list-group-item" style="cursor: pointer;" onclick="load('./data?p=<%= posisi; %>&mode=back', 'tampil')">Kembali
-        <%= posisi; %>
-    </li>
-    <% files.forEach(file=> { %>
-        <li class="list-group-item" style="cursor: pointer;" onclick="load('./data?p=<%= file; %>', 'tampil')">
-            <%= file; %>
-        </li>
-        <% }); %>
-</ul>
+<% switch(act){ case 'modal-mkdir' :{ %>
+    <form id="iniForm" onsubmit="prosesForm(event);" class="needs-validation" novalidate>
+        <div class="modal-header">
+            <h5 class="modal-title" id="staticBackdropLabel">Buat Folder baru</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Nama Folder</label>
+                <input type="text" name="nama" id="edtNama" class="form-control" required>
+                <div class="invalid-feedback">Nama Folder Wajib di isi boss</div>
+            </div>
+            <input type="hidden" name="p" id="edtLokasi">
+            <input type="hidden" name="act" value="buat folder">
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="tutupModal" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary" id="btnForm"><i id="lblForm"></i> Buat Folder</button>
+        </div>
+    </form>
+    <script>
+        document.getElementById("edtLokasi").value = document.getElementById("edtUrl").value;
+
+        function prosesForm(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            let form = document.querySelector('#iniForm');
+            if (form.checkValidity()) {
+                let btnSimpan = document.getElementById("btnForm");
+                let loadForm = document.getElementById("lblForm");
+                loadForm.innerHTML = "";
+                loadForm.className = "spinner-border spinner-border-sm";
+                btnSimpan.disabled = true;
+                let data = Object.values(form).reduce((obj, field) => {
+                    obj[field.name] = field.value;
+                    return obj
+                }, {});
+                fetch('./crud', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                }).then(response => response.json()).then(hasil => {
+                    if (hasil.status == "sukses") {
+                        alert(hasil.pesan);
+                        load("./data?p=" + document.getElementById("edtUrl").value, 'tampil');
+                        document.getElementById('tutupModal').click();
+                    } else {
+                        alert(hasil.pesan);
+                        loadForm.innerHTML = "";
+                        loadForm.className = "material-icons";
+                        btnSimpan.disabled = false;
+                    }
+                }).catch((error) => {
+                    alert("Mohon Maaf Terjadi Kesalahan Saat Proses, Silahkan Coba lagi");
+                    loadForm.innerHTML = "";
+                    loadForm.className = "material-icons";
+                    btnSimpan.disabled = false;
+                    console.log("Error: " + error);
+                });
+            } else {
+                let forms = document.getElementsByClassName('needs-validation');
+                let validation = Array.prototype.filter.call(forms, function(form) {
+                    form.classList.add('was-validated');
+                });
+            }
+        }
+    </script>
+    <% }break; %>
+
+        <% case 'modal-upload' :{ %>
+            <form id="iniForm" onsubmit="uploadFile(event);" class="needs-validation" novalidate>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Upload File</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Pilih FIle</label>
+                        <input type="file" name="file" id="edtFile" class="form-control" required>
+                        <div class="invalid-feedback">Silahkan pilih file boss</div>
+                    </div>
+                    <progress id="progressBar" value="0" max="100" style="width:100%;"></progress>
+                    <h3 id="status"></h3>
+                    <p id="loaded_n_total"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="tutupModal" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" id="btnForm"><i id="lblForm"></i> Buat Folder</button>
+                </div>
+            </form>
+            <script>
+                function _(el) {
+                    return document.getElementById(el);
+                }
+
+                function uploadFile(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    let form = document.querySelector("#iniForm");
+                    if (form.checkValidity()) {
+                        let btnSimpan = document.getElementById("btnForm");
+                        let loadForm = document.getElementById("lblForm");
+                        loadForm.className = "spinner-border spinner-border-sm";
+                        btnSimpan.disabled = true;
+                        var img = document.getElementById('edtFile');
+                        var formdata = new FormData();
+                        formdata.append("act", "upload file");
+                        formdata.append("p", document.getElementById("edtUrl").value);
+                        formdata.append("Img", img.files[0]);
+                        var ajax = new XMLHttpRequest();
+                        ajax.upload.addEventListener("progress", progressHandler, false);
+                        ajax.addEventListener("load", completeHandler, false);
+                        ajax.addEventListener("error", errorHandler, false);
+                        ajax.addEventListener("abort", abortHandler, false);
+                        ajax.open("POST", "./crud");
+                        ajax.send(formdata);
+                    } else {
+                        let forms = document.getElementsByClassName('needs-validation');
+                        let validation = Array.prototype.filter.call(forms, function(form) {
+                            form.classList.add('was-validated');
+                        });
+                    }
+                }
+
+                function progressHandler(event) {
+                    _("loaded_n_total").innerHTML = "Uploaded " + event.loaded + " bytes of " + event.total;
+                    var percent = (event.loaded / event.total) * 100;
+                    _("progressBar").value = Math.round(percent);
+                    _("status").innerHTML = Math.round(percent) + "% uploaded... entenono";
+                }
+
+                function completeHandler(event) {
+                    _("status").innerHTML = event.target.responseText;
+                    _("progressBar").value = 0;
+                    alert("Upload FIle Berhasil");
+                    load("./data?p=" + document.getElementById("edtUrl").value, 'tampil');
+                    document.getElementById("tutupModal").click();
+                }
+
+                function errorHandler(event) {
+                    let btnSimpan = document.getElementById("btnForm");
+                    let loadForm = document.getElementById("lblForm");
+                    loadForm.className = "";
+                    btnSimpan.disabled = false;
+                    _("status").innerHTML = "Upload Gagal";
+                }
+
+                function abortHandler(event) {
+                    let btnSimpan = document.getElementById("btnForm");
+                    let loadForm = document.getElementById("lblForm");
+                    loadForm.className = "";
+                    btnSimpan.disabled = false;
+                    _("status").innerHTML = "Upload Batal";
+                }
+
+                function prosesUpload(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    let form = document.querySelector("#iniForm");
+                    var img = document.getElementById('edtFile');
+                    let data = new FormData();
+                    if (form.checkValidity()) {
+                        let btnSimpan = document.getElementById("btnForm");
+                        let loadForm = document.getElementById("lblForm");
+                        loadForm.className = "spinner-border spinner-border-sm";
+                        btnSimpan.disabled = true;
+                        data.append("act", "upload file");
+                        data.append("p", document.getElementById("edtUrl").value);
+                        data.append("Img", img.files[0]);
+                        fetch('./crud', {
+                            method: 'POST',
+                            body: data,
+                        }).then(response => response.json()).then(hasil => {
+                            if (hasil.status == "sukses") {
+                                alert(hasil.pesan);
+                                load("./data?p=" + document.getElementById("edtUrl").value, 'tampil');
+                                document.getElementById('tutupModal').click();
+                            } else {
+                                alert(hasil.pesan);
+                                loadForm.innerHTML = "";
+                                loadForm.className = "material-icons";
+                                btnSimpan.disabled = false;
+                            }
+                        }).catch((error) => {
+                            loadForm.className = "";
+                            btnSimpan.disabled = false;
+                            console.log("Error: " + error);
+                        });
+                    } else {
+                        let forms = document.getElementsByClassName('needs-validation');
+                        let validation = Array.prototype.filter.call(forms, function(form) {
+                            form.classList.add('was-validated');
+                        });
+                    }
+                }
+            </script>
+            <% }break; %>
+
+                <% case 'modal-delete' :{ %>
+                    <form id="iniForm" onsubmit="deleteFile(event);" class="needs-validation" novalidate>
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="staticBackdropLabel">Delete File</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Apakah Peno Yakin Akana Menghapus Kenangan ini?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" id="tutupModal" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary" id="btnForm"><i id="lblForm"></i> Hapus</button>
+                        </div>
+                    </form>
+                    <script>
+                        function deleteFile(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            let btnSimpan = document.getElementById("btnForm");
+                            let loadForm = document.getElementById("lblForm");
+                            loadForm.className = "spinner-border spinner-border-sm";
+                            btnSimpan.disabled = true;
+                            let data = new FormData();
+                            data.append("act", "delete file");
+                            data.append("p", "<%= p %>");
+                            fetch('./crud', {
+                                method: 'POST',
+                                body: data,
+                            }).then(response => response.json()).then(hasil => {
+                                if (hasil.status == "sukses") {
+                                    alert(hasil.pesan);
+                                    load("./data?p=" + document.getElementById("edtUrl").value, 'tampil');
+                                    document.getElementById('tutupModal').click();
+                                } else {
+                                    alert(hasil.pesan);
+                                    loadForm.innerHTML = "";
+                                    loadForm.className = "material-icons";
+                                    btnSimpan.disabled = false;
+                                }
+                            }).catch((error) => {
+                                loadForm.className = "";
+                                btnSimpan.disabled = false;
+                                console.log("Error: " + error);
+                            });
+                        }
+                    </script>
+                    <% }break; %>
+
+                        <% case 'modal-listdb' :{ %>
+                            <form id="iniForm" onsubmit="prosesBackup(event);" class="needs-validation" novalidate>
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="staticBackdropLabel">Backup Database</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <label>Databse Host</label>
+                                        <input type="text" name="h" id="edtHost" class="form-control" value="localhost" required>
+                                        <div class="invalid-feedback">Host Database Wajib di isi boss</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Databse User</label>
+                                        <input type="text" name="u" id="edtUser" class="form-control" value="naylatools" required>
+                                        <div class="invalid-feedback">User Database Wajib di isi boss</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Databse Password</label>
+                                        <input type="password" name="p" id="edtPassword" class="form-control" required value="N@yl4gijutsu">
+                                        <div class="invalid-feedback">Password Database Wajib di isi boss</div>
+                                    </div>
+                                    <div class="d-grid">
+                                        <button type="button" class="btn btn-primary btn-sm btn-block" onclick="showDatabase(event);" id="btnSHowDB"><i id="lblShowBD"></i> Show Database</button>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>List Database</label>
+                                        <select name="db" id="edtDatabase" class="form-control" onchange="document.getElementById('edtNama').value = this.value" required></select>
+                                        <div class="invalid-feedback">Pilihen Database disek boss</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Nama Database</label>
+                                        <input type="text" name="nama" id="edtNama" class="form-control" required>
+                                        <div class="invalid-feedback">Nama Database Wajib Di isi boss</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="" id="chkKompress">
+                                                <label class="form-check-label" for="chkKompress">
+                                          Kompres Sekalian
+                                        </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="form-group" style="display:none" id="divType">
+                                                <select name="type" id="edtType" class="form-control">
+                                            <option value="rar">RAR</option>
+                                            <option value="zip">ZIP</option>
+                                            <option value="gz">TAR.GZ</option>
+                                        </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="edtC" value="no">
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" id="tutupModal" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary" id="btnForm"><i id="lblForm"></i> Backup Database </button>
+                                </div>
+                            </form>
+                            <script>
+                                document.getElementById("chkKompress").addEventListener("change", function() {
+                                    if (this.checked == true) {
+                                        document.getElementById("divType").style.display = "block";
+                                        document.getElementById("edtC").value = "yes";
+                                    } else {
+                                        document.getElementById("edtC").value = "no";
+                                        document.getElementById("divType").style.display = "none";
+                                    }
+                                });
+
+                                function showDatabase(e) {
+                                    let btn = document.getElementById("btnSHowDB");
+                                    let lbl = document.getElementById("lblShowBD");
+                                    let h = document.getElementById("edtHost").value;
+                                    let u = document.getElementById("edtUser").value;
+                                    let p = document.getElementById("edtPassword").value;
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    if (h != "" && u != "" && p != "") {
+                                        let data = new FormData();
+                                        lbl.className = "spinner-border spinner-border-sm";
+                                        btn.disabled = true;
+                                        data.append("act", "list database");
+                                        data.append("h", h);
+                                        data.append("u", u);
+                                        data.append("p", p);
+                                        fetch('./crud', {
+                                            method: 'POST',
+                                            body: data,
+                                        }).then(response => response.json()).then(hasil => {
+                                            let opt = "";
+                                            for (let i = 0; i < hasil.db.length; i++) {
+                                                opt += `<option value="${hasil.db[i].Database}">${hasil.db[i].Database}</option>`;
+                                            }
+                                            document.getElementById("edtDatabase").innerHTML = opt;
+                                            lbl.className = "material-icons";
+                                            btn.disabled = false;
+                                        }).catch((error) => {
+                                            lbl.className = "material-icons";
+                                            btn.disabled = false;
+                                            console.log("Error: " + error);
+                                        });
+                                    } else {
+                                        let forms = document.getElementsByClassName('needs-validation');
+                                        let validation = Array.prototype.filter.call(forms, function(form) {
+                                            form.classList.add('was-validated');
+                                        });
+                                    }
+                                }
+
+                                function prosesBackup(e) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    let form = document.querySelector("#iniForm");
+                                    var img = document.getElementById('edtFile');
+                                    let data = new FormData();
+                                    if (form.checkValidity()) {
+                                        let btnSimpan = document.getElementById("btnForm");
+                                        let loadForm = document.getElementById("lblForm");
+                                        loadForm.className = "spinner-border spinner-border-sm";
+                                        btnSimpan.disabled = true;
+                                        let h = document.getElementById("edtHost").value;
+                                        let u = document.getElementById("edtUser").value;
+                                        let p = document.getElementById("edtPassword").value;
+                                        let d = document.getElementById("edtDatabase").value;
+                                        let n = document.getElementById("edtNama").value;
+                                        data.append("act", "backup database");
+                                        data.append("h", h);
+                                        data.append("u", u);
+                                        data.append("p", p);
+                                        data.append("d", d);
+                                        data.append("n", n);
+                                        data.append("url", document.getElementById("edtUrl").value);
+                                        data.append("c", document.getElementById("edtC").value);
+                                        data.append("t", document.getElementById("edtType").value);
+                                        fetch('./crud', {
+                                            method: 'POST',
+                                            body: data,
+                                        }).then(response => response.json()).then(hasil => {
+                                            if (hasil.status == "sukses") {
+                                                alert(hasil.pesan);
+                                                load("./data?p=" + document.getElementById("edtUrl").value, 'tampil');
+                                                document.getElementById('tutupModal').click();
+                                            } else {
+                                                alert(hasil.pesan);
+                                                loadForm.innerHTML = "";
+                                                loadForm.className = "material-icons";
+                                                btnSimpan.disabled = false;
+                                            }
+                                        }).catch((error) => {
+                                            loadForm.className = "";
+                                            btnSimpan.disabled = false;
+                                            console.log("Error: " + error);
+                                        });
+                                    } else {
+                                        let forms = document.getElementsByClassName('needs-validation');
+                                        let validation = Array.prototype.filter.call(forms, function(form) {
+                                            form.classList.add('was-validated');
+                                        });
+                                    }
+                                }
+                            </script>
+                            <% }break; %>
+                                <% default:{ %>
+                                    <p></p>
+                                    <ul class="list-group">
+                                        <table class="table table-striped">
+                                            <thead class="thead-dark">
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Type</th>
+                                                    <th>Size</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% files.forEach(file=> { %>
+                                                    <tr>
+                                                        <% if(path.extname(posisi + "/" +file)=="" ){ %>
+                                                            <td style="cursor: pointer;" onclick="load('./data?p=<%= posisi+'/'+file; %>/', 'tampil')">
+                                                                <%= file; %>
+                                                            </td>
+                                                            <% } else { %>
+                                                                <td>
+                                                                    <%= file; %>
+                                                                </td>
+                                                                <% } %>
+                                                                    <td>
+                                                                        <%= path.extname(posisi + "/" +file); %>
+                                                                    </td>
+                                                                    <td>
+                                                                        <%= modul.size(posisi + "/" +file); %> Kb
+                                                                    </td>
+                                                                    <td>
+                                                                        <% if(path.extname(posisi + "/" +file)!="" ){ %>
+                                                                            <button class="btn btn-primary" onclick="window.open('./download?p=<%= posisi+'/'+file; %>')"><i class="material-icons">download</i></button>
+                                                                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#iniModal" onclick="load('./data?act=modal-delete&p=<%= posisi+'/'+file; %>', 'modalContent');"><i class="material-icons">delete</i></button>
+                                                                            <% } %>
+                                                                    </td>
+                                                    </tr>
+                                                    <% }); %>
+                                            </tbody>
+                                        </table>
+                                    </ul>
+                                    <script>
+                                        document.getElementById("edtUrl").value = "<%= posisi; %>";
+                                    </script>
+                                    <% }break; } %>

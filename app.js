@@ -8,7 +8,7 @@ const path = require('path');
 const pathview = path.join(__dirname + '/public');
 const app = express();
 
-app.use(bodyParser.json({ limit: "50mb" }));
+app.use(bodyParser.json({ limit: "50000mb" }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(fileUpload());
@@ -19,15 +19,13 @@ app.set('view engine', 'html');
 app.use(express.static('public'))
 
 app.use(function(req, res, next) {
-    let ownPath = ['/', '/data'];
+    let ownPath = ['/', '/data', '/download', '/crud'];
     let reqPath = req.path;
     if (ownPath.includes(reqPath)) {
         router.tampil(req, res, reqPath.substr(1));
     } else {
         router.tampil(req, res, '');
     }
-    // res.status(404);
-    // res.send('404: File Not Found');
 });
 
 const port = 3000;
