@@ -14,7 +14,7 @@
     <div class="container">
         <h1>Selamat Datang di aplikasi gabut</h1>
         <div class="input-group">
-            <input type="text" name="url" id="edtUrl" class="form-control" value="E:/" onchange="pindahDir()" />
+            <input type="text" name="url" id="edtUrl" class="form-control" value="<%= posisi; %>" onchange="pindahDir()" />
             <button class="btn btn-primary" onclick="pindahDir();">Go</button>
             <button class="btn btn-primary" data-bs-target="#iniModal" data-bs-toggle="modal" onclick="load('./data?act=modal-mkdir', 'modalContent');"><i class="material-icons">create_new_folder</i></button>
             <button class="btn btn-primary" data-bs-target="#iniModal" data-bs-toggle="modal" onclick="load('./data?act=modal-upload', 'modalContent');"><i class="material-icons">upload</i></button>
