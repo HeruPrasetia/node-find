@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login ke APlikasi Gabut</title>
+    <title>Login ke Aplikasi Gabut</title>
     <style>
         @import url(https://fonts.googleapis.com/css?family=Open+Sans);
         .btn {
@@ -181,12 +181,47 @@
 <body>
     <div class="login">
         <h1>Login</h1>
-        <form method="post">
-            <input type="text" name="u" placeholder="Username" required="required" />
-            <input type="password" name="p" placeholder="Password" required="required" />
-            <button type="submit" class="btn btn-primary btn-block btn-large">Let me in.</button>
+        <center>
+            <h3 style="color: #ffffff;">
+                <%= p; %>
+            </h3>
+        </center>
+        <form onsubmit="prosesLogin(event);">
+            <input type="text" name="u" placeholder="Jawaban Mu" id="edtJawaban" required="required" />
+            <!-- <input type="password" name="p" placeholder="Password" required="required" /> -->
+            <button type="submit" class="btn btn-primary btn-block btn-large" id="btnForm">Let me in.</button>
         </form>
     </div>
+    <script>
+        document.getElementById("edtJawaban").focus();
+
+        function prosesLogin(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            let btnSimpan = document.getElementById("btnForm");
+            btnSimpan.disabled = true;
+            let data = new FormData();
+            data.append("act", "cek login");
+            data.append("q", "<%= q %>");
+            data.append("a", document.getElementById("edtJawaban").value);
+            fetch('./login', {
+                method: 'POST',
+                body: data,
+            }).then(response => response.json()).then(hasil => {
+                if (hasil.status == "sukses") {
+                    alert(hasil.pesan);
+                    sessionStorage.setItem("sesi", "masuk");
+                    window.location.href = "./";
+                } else {
+                    alert(hasil.pesan);
+                    btnSimpan.disabled = false;
+                }
+            }).catch((error) => {
+                btnSimpan.disabled = false;
+                console.log("Error: " + error);
+            });
+        }
+    </script>
 </body>
 
 </html>

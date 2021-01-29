@@ -19,7 +19,7 @@ app.set('view engine', 'html');
 app.use(express.static('public'))
 
 app.use(function(req, res, next) {
-    let ownPath = ['/', '/data', '/download', '/crud'];
+    let ownPath = ['/', '/data', '/download', '/crud', '/login'];
     let reqPath = req.path;
     if (ownPath.includes(reqPath)) {
         router.tampil(req, res, reqPath.substr(1));

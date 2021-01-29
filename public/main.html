@@ -14,8 +14,8 @@
     <div class="container">
         <h1>Selamat Datang di aplikasi gabut</h1>
         <div class="input-group">
-            <input type="text" name="url" id="edtUrl" class="form-control" value="E:/" />
-            <button class="btn btn-primary" onclick="load('./data?p='+document.getElementById('edtUrl').value, 'tampil')">Go</button>
+            <input type="text" name="url" id="edtUrl" class="form-control" value="E:/" onchange="pindahDir()" />
+            <button class="btn btn-primary" onclick="pindahDir();">Go</button>
             <button class="btn btn-primary" data-bs-target="#iniModal" data-bs-toggle="modal" onclick="load('./data?act=modal-mkdir', 'modalContent');"><i class="material-icons">create_new_folder</i></button>
             <button class="btn btn-primary" data-bs-target="#iniModal" data-bs-toggle="modal" onclick="load('./data?act=modal-upload', 'modalContent');"><i class="material-icons">upload</i></button>
             <button class="btn btn-primary" data-bs-target="#iniModal" data-bs-toggle="modal" onclick="load('./data?act=modal-listdb', 'modalContent');"><i class="material-icons">sd_storage</i></button>
@@ -68,6 +68,21 @@
         </div>
     </div>
     <script src="./script.js"></script>
+    <script>
+        let sesi = sessionStorage.getItem("sesi") ? sessionStorage.getItem("sesi") : "null";
+        if (sesi == "null") {
+            window.location.href = "./login";
+        }
+
+        function pindahDir() {
+            let url = document.getElementById('edtUrl').value;
+            if (url.length < 4) {
+                window.location.href = "./";
+            } else {
+                load('./data?p=' + url, 'tampil')
+            }
+        }
+    </script>
 </body>
 
 </html>

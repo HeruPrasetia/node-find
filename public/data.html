@@ -427,7 +427,7 @@
                                                 <% files.forEach(file=> { %>
                                                     <tr>
                                                         <% if(path.extname(posisi + "/" +file)=="" ){ %>
-                                                            <td style="cursor: pointer;" onclick="load('./data?p=<%= posisi+'/'+file; %>/', 'tampil')">
+                                                            <td style="cursor: pointer;" onclick="load('./data?p=<%= posisi+'/'+file; %>', 'tampil')">
                                                                 <%= file; %>
                                                             </td>
                                                             <% } else { %>

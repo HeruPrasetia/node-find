@@ -45,18 +45,18 @@ exports.tampil = async function(req, res, act) {
                         default:
                             {
                                 let p = req.query.p;
-                                console.log(p)
-                                let mode = req.query.m ? req.query.m : "next";
-                                if (mode == "next") {
-                                    cur = posisi;
-                                    posisi = p;
+                                console.log(p);
+                                if (p == "D:\\" || p == "E:\\") {
+                                    posisi = rootDir;
+                                    fs.readdir(posisi, (err, files) => {
+                                        res.render(pathview + '/main.html', { files: files, posisi: posisi, path: path, modul: modul });
+                                    });
                                 } else {
-                                    posisi = cur;
+                                    posisi = p;
+                                    fs.readdir(posisi, (err, files) => {
+                                        res.render(pathview + '/data.html', { files: files, posisi: posisi, path: path, modul: modul, act: "" });
+                                    });
                                 }
-
-                                fs.readdir(posisi, (err, files) => {
-                                    res.render(pathview + '/data.html', { files: files, posisi: posisi, path: path, modul: modul, act: "" });
-                                });
                             }
                             break;
                     }
@@ -153,6 +153,34 @@ exports.tampil = async function(req, res, act) {
                                     });
                                 }
                                 res.send({ "status": "sukses", "pesan": "Berhasil membackup database dengan nama : " + n });
+                            }
+                            break;
+                    }
+                }
+                break;
+
+            case 'login':
+                {
+                    switch (req.body.act) {
+                        case 'cek login':
+                            {
+                                let jawaban = ["uvuv", "ricky", "ngiseng", "pentil", "nayla", "ganda tadyo surya", "laudy", "prasetia", "limman susanto", "parkiran", "nasi goreng"];
+                                let q = req.body.q;
+                                let a = req.body.a;
+                                console.log(q + jawaban[q])
+                                if (a == jawaban[q]) {
+                                    res.send({ "status": "sukses", "pesan": "jawaban anda benar" });
+                                } else {
+                                    res.send({ "status": "gagal", "pesan": "Ngawur" });
+                                }
+                            }
+                            break;
+
+                        default:
+                            {
+                                let pertanyaan = ["Nama Variable Apa yang di benci mas ganda?", "siapa nama partner kerja mas erwin", "Kebiasaan pak ichsan", "apa yang paling mencolok dari diri mas ganda", "siapa nama anak mas heru", "nama lengkap mas ganda", "nama belakang mas erwin", "nama belakang pembuat aplikasi ini", "nama lengkap boss", "dimana tempat pertama kali mas ganda bertemu pacanya", "makanan favorit mas ganda"];
+                                let q = Math.floor(Math.random() * 11);
+                                res.render(pathview + "/login.html", { q: q, p: pertanyaan[q] });
                             }
                             break;
                     }
