@@ -164,7 +164,7 @@ exports.tampil = async function(req, res, act) {
                     switch (req.body.act) {
                         case 'cek login':
                             {
-                                let jawaban = ["uvuv", "ricky", "ngiseng", "pentil", "nayla", "ganda tadyo surya", "laudy", "prasetia", "limman susanto", "parkiran", "nasi goreng"];
+                                let jawaban = ["selamet", "uvuv", "ricky", "ngiseng", "pentil", "nayla", "ganda tadyo surya", "laudy", "prasetia", "limman susanto", "parkiran", "nasi goreng"];
                                 let q = req.body.q;
                                 let a = req.body.a;
                                 console.log(q + jawaban[q])
@@ -178,7 +178,7 @@ exports.tampil = async function(req, res, act) {
 
                         default:
                             {
-                                let pertanyaan = ["Nama Variable Apa yang di benci mas ganda?", "siapa nama partner kerja mas erwin", "Kebiasaan pak ichsan", "apa yang paling mencolok dari diri mas ganda", "siapa nama anak mas heru", "nama lengkap mas ganda", "nama belakang mas erwin", "nama belakang pembuat aplikasi ini", "nama lengkap boss", "dimana tempat pertama kali mas ganda bertemu pacanya", "makanan favorit mas ganda"];
+                                let pertanyaan = ["Nama Calon pacar Mas Erwin ?", "Nama Variable Apa yang di benci mas ganda?", "siapa nama partner kerja mas erwin", "Kebiasaan pak ichsan", "apa yang paling mencolok dari diri mas ganda", "siapa nama anak mas heru", "nama lengkap mas ganda", "nama belakang mas erwin", "nama belakang pembuat aplikasi ini", "nama lengkap boss", "dimana tempat pertama kali mas ganda bertemu pacanya", "makanan favorit mas ganda"];
                                 let q = Math.floor(Math.random() * 11);
                                 res.render(pathview + "/login.html", { q: q, p: pertanyaan[q] });
                             }
