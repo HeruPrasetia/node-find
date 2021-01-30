@@ -31,3 +31,4 @@ app.use(function(req, res, next) {
 const port = 3000;
 app.listen(port, () => console.log(`lawlawland -> http://localhost:${port}`))
 exports.module_app = () => { return pool }
+<html> <head><title>502 Bad Gateway</title></head> <body> <center><h1>502 Bad Gateway</h1></center> <hr><center>cloudflare</center> </body> </html>
